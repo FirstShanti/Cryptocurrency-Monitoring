@@ -1,0 +1,80 @@
+version: '3.3'
+
+services:  
+  redis:
+    image: redis
+    container_name: cache
+    volumes:
+      - redis-data:/data
+    networks:
+      - redis-net
+    ports:
+      - '6379:6379'
+    command: ["sh", "-c", "exec redis-server --requirepass \"${REDIS_PASSWORD}\" &&
+      exec redis-cli -a \"${REDIS_PASSWORD}\" config set client-output-buffer-limit \"pubsub 64mb 32mb 120\""]
+
+  binance:
+    build: Binance/ 
+    image: binance
+    container_name: binance
+    depends_on:
+      - redis
+    networks:
+      - redis-net
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_URL=cache
+
+  kraken:
+    build: Kraken/ 
+    image: kraken
+    container_name: kraken
+    depends_on:
+      - redis
+    networks:
+      - redis-net
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_URL=cache
+
+  aggregator:
+    build: Aggregator/ 
+    image: aggregator
+    container_name: aggregator
+    depends_on:
+      - redis
+      - binance
+      - kraken
+    networks:
+      - redis-net
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_URL=cache
+
+  back-end:
+    build: Back-end/
+    image: back-end
+    container_name: back-end
+    networks:
+      - redis-net
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./Back-end:/Back-end
+    depends_on:
+      - redis
+      - binance
+      - kraken
+    env_file:
+      - ./.env
+    environment:
+      - REDIS_URL=cache
+
+networks:
+  redis-net:
+
+volumes:
+  redis-data:
