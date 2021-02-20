@@ -73,6 +73,20 @@ services:
     environment:
       - REDIS_URL=cache
 
+  nginx:
+    restart: always
+    image: nginx:latest
+    networks:
+      - nginx-net
+    ports:
+      - '80:80'
+      environment:
+      - REDIS_URL=cache
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - back-end:back-end
+
 networks:
   redis-net:
 
