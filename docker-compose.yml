@@ -80,7 +80,7 @@ services:
       - nginx-net
     ports:
       - '80:80'
-      environment:
+    environment:
       - REDIS_URL=cache
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -89,6 +89,7 @@ services:
 
 networks:
   redis-net:
+  nginx-net:
 
 volumes:
   redis-data:
