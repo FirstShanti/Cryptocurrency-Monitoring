@@ -36,13 +36,13 @@ class Binance():
         result = {'binance': {}}
         prices = self.client.get_all_tickers()
         [result['binance'].update({self.pairs[item['symbol']]: item['price']}) for item in prices]
-        r.publish('tickers', json.dumps(result))
+        r.publish('tickers', json.dumps(result, indent=' '))
 
 
     def process_message(self, msg):
         if isinstance(msg, list):
             self.data = parse_data(msg, self.pairs)
-            r.publish('tickers', json.dumps({self.stock_name: self.data}))
+            r.publish('tickers', json.dumps({self.stock_name: self.data}, indent=' '))
 
 
     def subscription(self):

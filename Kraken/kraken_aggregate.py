@@ -47,7 +47,7 @@ class Kraken():
         if response.status_code == 200:
             response = response.json()
             [result['kraken'].update({self.pairs_name_map[ticker]: value['c'][0]}) for ticker, value in response['result'].items()]
-            r.publish('tickers', json.dumps(result))
+            r.publish('tickers', json.dumps(result, indent=' '))
 
         # while pairs:
         #     new_pair = pairs.pop(0)
@@ -83,7 +83,7 @@ class Kraken():
                     'XXML', 'XML')
             price = msg[1][-1][0]
             self.data.update({pair: price})
-            r.publish('tickers', json.dumps({self.stock_name: self.data}))
+            r.publish('tickers', json.dumps({self.stock_name: self.data}, indent=' '))
 
 
     def subscription(self):
