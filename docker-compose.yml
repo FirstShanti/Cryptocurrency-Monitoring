@@ -54,12 +54,15 @@ services:
     environment:
       - REDIS_URL=cache
 
-  back-end:
+  backend:
     build: Back-end/
-    image: back-end
-    container_name: back-end
+    image: backend
+    container_name: backend
     networks:
       - redis-net
+      #- nginx-net
+    expose:
+      - 5000
     ports:
       - '5000:5000'
     volumes:
@@ -76,20 +79,22 @@ services:
   nginx:
     restart: always
     image: nginx:latest
-    networks:
-      - nginx-net
+    depends_on:
+      - backend
+    #networks:
+      #- nginx-net
+    expose:
+      - 80
     ports:
       - '80:80'
-    environment:
-      - REDIS_URL=cache
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    links:
-      - back-end:back-end
+    environment:
+      - HOST=backend
 
 networks:
   redis-net:
-  nginx-net:
+  #nginx-net:
 
 volumes:
   redis-data:
