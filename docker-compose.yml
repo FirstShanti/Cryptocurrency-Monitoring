@@ -1,7 +1,7 @@
 version: '3.3'
 
 services:  
-  redis:
+  cache:
     image: redis
     container_name: cache
     volumes:
@@ -18,7 +18,7 @@ services:
     image: binance
     container_name: binance
     depends_on:
-      - redis
+      - cache
     networks:
       - redis-net
     env_file:
@@ -31,7 +31,7 @@ services:
     image: kraken
     container_name: kraken
     depends_on:
-      - redis
+      - cache
     networks:
       - redis-net
     env_file:
@@ -44,7 +44,6 @@ services:
     image: aggregator
     container_name: aggregator
     depends_on:
-      - redis
       - binance
       - kraken
     networks:
@@ -60,7 +59,6 @@ services:
     container_name: backend
     networks:
       - redis-net
-      #- nginx-net
     expose:
       - 5000
     ports:
@@ -68,9 +66,7 @@ services:
     volumes:
       - ./Back-end:/Back-end
     depends_on:
-      - redis
-      - binance
-      - kraken
+      - aggregator    
     env_file:
       - ./.env
     environment:
@@ -81,20 +77,16 @@ services:
     image: nginx:latest
     depends_on:
       - backend
-    #networks:
-      #- nginx-net
     expose:
       - 80
     ports:
       - '80:80'
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-    environment:
-      - HOST=backend
-
+      
 networks:
   redis-net:
-  #nginx-net:
 
 volumes:
   redis-data:
+

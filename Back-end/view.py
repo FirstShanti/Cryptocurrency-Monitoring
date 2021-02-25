@@ -110,6 +110,9 @@ def index():
 @app.route('/monitoring_stream')
 def kraken():
 	return Response(
+        #content_type="text/event-stream",
+        headers={'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'},
         status='200',
-        content_type='application/json',
+        #content_type='application/json',
+        mimetype = "multipart/x-mixed-replace; boundary=frame",
         response=Aggregate().run())

@@ -24,7 +24,6 @@ class Aggregate(Process):
         if ( aggregated_data := r.get('aggregated') ):
             to_send = json.loads(aggregated_data)
             yield json.dumps(to_send, indent=' ')
-
         while True:
 
             try:
@@ -32,11 +31,16 @@ class Aggregate(Process):
                     if message['data'] != 1:
                         data = json.loads(message['data'])
                         to_send.update(data)
-                        yield json.dumps(to_send, indent=' ')
-                        sleep(0.001)
-                else:
-                    continue
+                        #yield json.dumps(to_send, indent=' ')
+                        yield (b'-next-'+bytearray(json.dumps(to_send).encode()))
+                        #sleep(0.001)
+                    else:
+                        continue
             except ConnectionError as e:
                 logging.error('ConnectionError')
+                continue
+            except AttributeError as e:
+                pubsub = r.pubsub()
+                pubsub.subscribe('tickers')
                 continue
 

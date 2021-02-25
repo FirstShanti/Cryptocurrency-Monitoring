@@ -23,22 +23,26 @@ $(document).ready( function () {
 	}
 
 	async function get_data() {
-		const response = await fetch('/monitoring_stream');
-	    const reader = response.body.getReader();
+	    const response = await fetch('/monitoring_stream');
+	    const reader = response.body
+		.getReader()
 	    let ticker_store = {}
+            let decoder = new TextDecoder("utf-8")
 
 		while (true) {
 			const { value, done } = await reader.read();
 			if (done) break;
+			let err_value = ''
 			try {
-			    let result = new TextDecoder("utf-8").decode(value);
+			    let result = decoder.decode(value);
+				result = result.split('-next-')[1];
 				let data = JSON.parse(result);
 				binance_data = data.binance
 				kraken_data = data.kraken
 				let temp = {
 					'data': [],
 					'columns': []
-				} 
+				}
 				for (stock in data) {
 					for (const [pair, price] of Object.entries(data[stock])) {
 					    // console.log(ticker_store);
@@ -58,6 +62,7 @@ $(document).ready( function () {
 					}
 				}
 				temp.data = Object.values(ticker_store)
+				//console.log(temp.data)
 				temp.columns = [
 					{
 						'title': 'pair',
@@ -70,7 +75,9 @@ $(document).ready( function () {
 					},
 				]
 				draw(temp)
-		    } catch(e) { }
+		    } catch(e) {
+			//console.log(e)
+			}
 		}
 	}
 	get_data()
